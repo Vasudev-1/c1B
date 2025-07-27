@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional, List
@@ -10,6 +11,19 @@ class ModelConfig:
     EMBEDDING_DIMENSION = 768
     EMBEDDING_MAX_LENGTH = 8192  # Long context support
     EMBEDDING_BATCH_SIZE = 32
+    
+    # Text processing parameters
+    CHUNK_SIZE = 200  # words per chunk
+    CHUNK_STRIDE = 50  # overlap between chunks
+    
+    # Retrieval parameters
+    RETRIEVAL_TOP_K = 50  # initial candidates
+    FINAL_SECTIONS = 10   # final sections to return
+    TOP_SENTENCES = 5     # sentences per refined text
+    
+    # Scoring weights
+    SIMILARITY_WEIGHT = 0.7
+    HEADING_BOOST_WEIGHT = 0.3
     
     # Alternative models for comparison
     ALTERNATIVE_MODELS = {
@@ -54,5 +68,25 @@ class EvaluationConfig:
 # Runtime configuration
 MAX_PROCESSING_TIME = 55  # seconds
 CACHE_DIR = "/tmp/hackathon_cache"
-DEBUG_MODE = False
+DEBUG_MODE = os.environ.get("DEBUG", "false").lower() == "true"
 USE_GPU = True if os.environ.get("CUDA_VISIBLE_DEVICES") else False
+
+def setup_logging(debug: bool = False):
+    """Setup logging configuration"""
+    level = logging.DEBUG if debug or DEBUG_MODE else logging.INFO
+    
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(),
+        ]
+    )
+    
+    # Suppress verbose third-party logs
+    logging.getLogger('transformers').setLevel(logging.WARNING)
+    logging.getLogger('sentence_transformers').setLevel(logging.WARNING)
+    logging.getLogger('torch').setLevel(logging.WARNING)
+    
+    logger = logging.getLogger(__name__)
+    logger.info(f"Logging configured - Debug: {debug or DEBUG_MODE}")

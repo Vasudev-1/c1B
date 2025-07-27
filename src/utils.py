@@ -2,14 +2,19 @@ import time, logging, traceback, pickle, hashlib
 from pathlib import Path
 from typing import Any, Optional
 
-from .config import CACHE_DIR
-
 logger = logging.getLogger(__name__)
+
+# Cache directory from config
+CACHE_DIR = "/tmp/hackathon_cache"
 
 def log_time() -> float:
     return time.time()
 
 def debug(msg: str):
+    logger.debug(msg)
+
+def debug_print(msg: str):
+    """Alternative debug function for compatibility"""
     logger.debug(msg)
 
 def info(msg: str):
@@ -18,6 +23,7 @@ def info(msg: str):
 def error(msg: str, exc: Optional[Exception] = None):
     logger.error(msg)
     if exc:
+        logger.error(f"Exception details: {str(exc)}")
         logger.error(traceback.format_exc())
 
 class EmbeddingCache:
@@ -46,19 +52,25 @@ class EmbeddingCache:
         except Exception as e:
             error(f"Failed writing cache {p}", e)
 
+# Global cache instance
 cache = EmbeddingCache()
+cache_embeddings = {}  # In-memory cache for embeddings
 
 def validate_input(data: dict) -> bool:
-    required = ["persona","job_to_be_done","documents"]
+    """Validate input JSON structure"""
+    required = ["persona", "job_to_be_done", "documents"]
     for f in required:
         if f not in data:
             error(f"Missing field in input JSON: {f}")
             return False
+    
     if not isinstance(data["documents"], list):
         error("'documents' must be a list")
         return False
+    
     for doc in data["documents"]:
         if "filename" not in doc:
             error("Each document must include 'filename'")
             return False
+    
     return True
