@@ -41,7 +41,10 @@ def rerank(cands, kws, n=None):
 def refine_text(text: str, qvec: np.ndarray) -> str:
     global _refine_model
     if _refine_model is None:
-        _refine_model = SentenceTransformer(ModelConfig.EMBEDDING_MODEL)
+        _refine_model = SentenceTransformer(
+            ModelConfig.EMBEDDING_MODEL,
+            trust_remote_code=True  # Add this line
+        )
     sents = nltk.sent_tokenize(text)
     if len(sents)<=ModelConfig.TOP_SENTENCES:
         return text

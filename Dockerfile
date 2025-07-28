@@ -9,10 +9,9 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy source code first
-COPY src/ /app/src/
-COPY Challenge_1b/ /app/Challenge_1b/
+COPY . .
 
-# Create __init__.py files to make src a proper Python package
+# Create _init_.py files to make src a proper Python package
 RUN touch /app/src/__init__.py
 
 # Install Python dependencies with proper versions

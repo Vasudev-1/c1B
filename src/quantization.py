@@ -1,3 +1,4 @@
+import torch  # Add this import
 import torch.nn as nn
 from torch.quantization import quantize_dynamic
 from .utils import debug, error
